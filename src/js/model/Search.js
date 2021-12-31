@@ -14,7 +14,7 @@ export default class Search {
       this.result = result.data.recipes;
       return this.result;
     } catch (error) {
-      alert("Алдаа гарлаа! " + error);
+      console.log("Алдаа гарлаа! " + error);
     }
   }
 }
