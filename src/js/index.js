@@ -8,8 +8,10 @@ import { highLightSelectedRecipe } from "./view/recipeView";
 import List from "./model/List";
 import * as listView from "./view/listView";
 import Like from "./model/Like";
+import * as likesView from "./view/likesView";
 
 const state = {};
+likesView.toggleLikeMenu(0);
 
 const controlSearch = async () => {
   const query = searchView.getInput();
@@ -42,6 +44,7 @@ elements.pageButtons.addEventListener("click", (event) => {
 
 const controlRecipe = async () => {
   const id = window.location.hash.replace("#", "");
+  if (!state.likes) state.likes = new Like();
   if (id) {
     state.recipe = new Recipe(id);
     clearRecipe();
@@ -51,7 +54,7 @@ const controlRecipe = async () => {
     clearLoader();
     state.recipe.calcTime();
     state.recipe.calcHuniiToo();
-    renderRecipe(state.recipe);
+    renderRecipe(state.recipe, state.likes.isLiked(state.recipe.id));
   }
 };
 
@@ -67,16 +70,19 @@ const constrolLike = () => {
   const currentRecipeId = state.recipe.id;
   if (state.likes.isLiked(currentRecipeId)) {
     state.likes.deleteLike(currentRecipeId);
-    console.log(state.likes);
+    likesView.deleteLike(currentRecipeId);
+    likesView.toggleLikeBtn(false);
   } else {
-    state.likes.addLike(
+    const newLike = state.likes.addLike(
       state.recipe.id,
       state.recipe.title,
       state.recipe.publisher,
       state.recipe.image_url
     );
-    console.log(state.likes);
+    likesView.renderLike(newLike);
+    likesView.toggleLikeBtn(true);
   }
+  likesView.toggleLikeMenu(state.likes.getNumberOfLikes());
 };
 
 const constrolList = () => {
