@@ -2,6 +2,11 @@ require("@babel/polyfill");
 import Search from "./model/Search";
 import { elements, renderLoader, clearLoader } from "./view/base";
 import * as searchView from "./view/searchView";
+import Recipe from "./model/Recipe";
+import { renderRecipe, clearRecipe } from "./view/recipeView";
+import { highLightSelectedRecipe } from "./view/recipeView";
+import List from "./model/List";
+import * as listView from "./view/listView";
 
 const state = {};
 
@@ -31,5 +36,42 @@ elements.pageButtons.addEventListener("click", (event) => {
     const gotoPageNumber = parseInt(btn.dataset.goto, 10);
     searchView.clearSearchResult();
     searchView.renderRecipes(state.search.result, gotoPageNumber);
+  }
+});
+
+const controlRecipe = async () => {
+  const id = window.location.hash.replace("#", "");
+  if (id) {
+    state.recipe = new Recipe(id);
+    clearRecipe();
+    renderLoader(elements.recipeDiv);
+    highLightSelectedRecipe(id);
+    await state.recipe.getRecipe();
+    clearLoader();
+    state.recipe.calcTime();
+    state.recipe.calcHuniiToo();
+    renderRecipe(state.recipe);
+  }
+};
+
+// window.addEventListener("hashchange", controlRecipe);
+// window.addEventListener("load", controlRecipe);
+
+["hashchange", "load"].forEach((el) =>
+  window.addEventListener(el, controlRecipe)
+);
+
+const constrolList = () => {
+  state.list = new List();
+  listView.clearItem();
+  state.recipe.ingredients.forEach((n) => {
+    state.list.addItem(n);
+    listView.renderItem(n);
+  });
+};
+
+elements.recipeDiv.addEventListener("click", (e) => {
+  if (e.target.matches(".recipe__btn, .recipe__btn *")) {
+    constrolList();
   }
 });
