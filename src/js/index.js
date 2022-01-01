@@ -7,6 +7,7 @@ import { renderRecipe, clearRecipe } from "./view/recipeView";
 import { highLightSelectedRecipe } from "./view/recipeView";
 import List from "./model/List";
 import * as listView from "./view/listView";
+import Like from "./model/Like";
 
 const state = {};
 
@@ -61,17 +62,42 @@ const controlRecipe = async () => {
   window.addEventListener(el, controlRecipe)
 );
 
+const constrolLike = () => {
+  if (!state.likes) state.likes = new Like();
+  const currentRecipeId = state.recipe.id;
+  if (state.likes.isLiked(currentRecipeId)) {
+    state.likes.deleteLike(currentRecipeId);
+    console.log(state.likes);
+  } else {
+    state.likes.addLike(
+      state.recipe.id,
+      state.recipe.title,
+      state.recipe.publisher,
+      state.recipe.image_url
+    );
+    console.log(state.likes);
+  }
+};
+
 const constrolList = () => {
   state.list = new List();
   listView.clearItem();
   state.recipe.ingredients.forEach((n) => {
-    state.list.addItem(n);
-    listView.renderItem(n);
+    const item = state.list.addItem(n);
+    listView.renderItem(item);
   });
 };
 
 elements.recipeDiv.addEventListener("click", (e) => {
   if (e.target.matches(".recipe__btn, .recipe__btn *")) {
     constrolList();
+  } else if (e.target.matches(".recipe__love, .recipe__love *")) {
+    constrolLike();
   }
+});
+
+elements.shoppingList.addEventListener("click", (e) => {
+  const id = e.target.closest(".shopping__item").dataset.itemid;
+  state.list.deleteItem(id);
+  listView.deleteItem(id);
 });
